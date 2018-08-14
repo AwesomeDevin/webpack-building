@@ -6,7 +6,7 @@ const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");  
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 
-const DropConsoleWebpackPlugin = require('./plugins/drop-console-webpack-plugin')
+const DropConsoleWebpackPlugin = require('drop-console-webpack-plugin')
 
 module.exports = {
     mode: 'none',

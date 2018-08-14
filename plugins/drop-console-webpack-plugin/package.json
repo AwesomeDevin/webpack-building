@@ -1,8 +1,7 @@
 {
   "name": "drop-console-webpack-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A webpack plugin for removing console and supporting webpack4",
-  "main": "index.js",
   "scripts": {
     "test": "npm test"
   },
@@ -18,5 +17,6 @@
   "bugs": {
     "url": "https://github.com/Rise-Devin/webpack-building/issues"
   },
+  "main": "src/cjs.js",
   "homepage": "https://github.com/Rise-Devin/webpack-building#readme"
 }
