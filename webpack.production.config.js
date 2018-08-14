@@ -6,6 +6,7 @@ const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");  
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 
+const DropConsoleWebpackPlugin = require('./plugins/drop-console-webpack-plugin')
 
 module.exports = {
     mode: 'none',
@@ -30,6 +31,15 @@ module.exports = {
                 parallel: true,
                 sourceMap: false, // set to true if you want JS source maps
                 uglifyOptions: {
+                    warning: "verbose",
+                    ecma: 6,
+                    beautify: false,
+                    compress: false,
+                    comments: false,
+                    mangle: false,
+                    toplevel: false,
+                    keep_classnames: true,
+                    keep_fnames: true,
                     drop_debugger: true,
                     drop_console: true
                     }
@@ -88,6 +98,7 @@ module.exports = {
         ]
     },
     plugins: [
+        new DropConsoleWebpackPlugin({drop_error:false}),
         new webpack.BannerPlugin('版权所有，翻版必究'),
         new HtmlWebpackPlugin({
             template: __dirname + "/src/index.tmpl.html",//new 一个这个插件的实例，并传入相关的参数,
@@ -102,6 +113,7 @@ module.exports = {
           filename: "[name]-[contenthash].css",
           chunkFilename: "[id].css"
         }),
+        // new HelloWorldPlugin({drop_log: true,drop_error:true,drop_info:true,drop_warning:true}),
     ],
 }
 

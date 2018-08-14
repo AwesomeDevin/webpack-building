@@ -9,5 +9,9 @@ import {render} from 'react-dom';
 import Greeter from './greeter';
 
 console.log(document.getElementById('root'))
+console.warn(document.getElementById('root'))
+console.error(document.getElementById('root'))
+console.info(document.getElementById('root'))
+
 render(<Greeter />, document.getElementById('root'));
 
