@@ -13,7 +13,7 @@ var _path = require('path');
 var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-const startTime = Date.now()
+
 
 class DropConsoleWebpackPlugin {
   constructor(options) {
@@ -31,13 +31,15 @@ class DropConsoleWebpackPlugin {
         for(var file of chunks[i].files)
         {
           (async(file,self,compilation)=>{
-            console.log(file)
-            if(!file.match('chunk'))
+            if(!file.match('chunk')&&!file.match('.map'))
             {
-              let source = compilation.assets[file].source()
-              var replacedSource = await self.toReplace(source)
-              compilation.assets[file].source = ()=>{
-                return  replacedSource
+                if(this.excludeRegex.length<1||!file.match(this.excludeRegex))
+                {
+                  let source = compilation.assets[file].source()
+                  var replacedSource = await self.toReplace(source)
+                  compilation.assets[file].source = ()=>{
+                    return  replacedSource
+                  }
               }
             }
           })(file,self,compilation)
@@ -139,8 +141,10 @@ class DropConsoleWebpackPlugin {
     //   callback()
     // })
     compiler.hooks.emit.tap(this.pluginName,async (compilation) => {
+        const startTime = Date.now()
+        this.excludeRegex = this.initExcludeRegex()
         await this.findChunks(compilation)   //remove in compilation,the performace is not good,so that abandon
-        console.info('drop-console:'+parseInt((Date.now()-startTime) )+'ms')
+        console.info('[drop-console]: '+parseInt((Date.now()-startTime) /1000 )+'s')
     });
   }
 }
