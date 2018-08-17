@@ -5,8 +5,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");   //css提取
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");   //css压缩
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin')
-// const DropConsoleWebpackPlugin = require('./plugins/drop-console-webpack-plugin')
-const DropConsoleWebpackPlugin = require('drop-console-webpack-plugin')
+const DropConsoleWebpackPlugin = require('./plugins/drop-console-webpack-plugin')
+// const DropConsoleWebpackPlugin = require('drop-console-webpack-plugin')
 
 
 

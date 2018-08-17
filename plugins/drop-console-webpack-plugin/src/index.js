@@ -13,7 +13,7 @@ var _path = require('path');
 var _path2 = _interopRequireDefault(_path);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+const startTime = Date.now()
 
 class DropConsoleWebpackPlugin {
   constructor(options) {
@@ -21,6 +21,7 @@ class DropConsoleWebpackPlugin {
     this.fileList = [];
     this.pluginName = 'DropConsoleWebpackPlugin'
     this.emitCompilation = null;
+    this.excludeRegex='';
   }
 
   async findChunks(compilation){
@@ -30,20 +31,25 @@ class DropConsoleWebpackPlugin {
         for(var file of chunks[i].files)
         {
           (async(file,self,compilation)=>{
-            let source = compilation.assets[file].source()
-            var replacedSource = await self.toReplace(source)
-            compilation.assets[file].source = ()=>{
-              return  replacedSource
+            console.log(file)
+            if(!file.match('chunk'))
+            {
+              let source = compilation.assets[file].source()
+              var replacedSource = await self.toReplace(source)
+              compilation.assets[file].source = ()=>{
+                return  replacedSource
+              }
             }
           })(file,self,compilation)
-          // compilation.assets[file].source = await this.toReplace(source)
         }
     }
   }
 
    async toReplace(source){
     const replace = new Replace(source)
-    let drop_log= true,drop_error= false,drop_info= true,drop_warn = true
+    const conditionArr = []
+    let drop_log= true,drop_error= false,drop_info= true,drop_warn = false
+    
     if(this.options&&this.options.drop_log === false)
     {
       drop_log = false
@@ -54,31 +60,87 @@ class DropConsoleWebpackPlugin {
     }if(this.options&&this.options.drop_info === false)
     {
       drop_info = false
-    }if(this.options&&this.options.drop_warn === false)
+    }if(this.options&&this.options.drop_warn === true)
     {
-      drop_warn = false
+      drop_warn = true
     }
     if(drop_log )
     {
-      source = await replace.toReplace('console.log')
+    	conditionArr.push('console.log')
     }
     if(drop_error)
     {
-      source = await  replace.toReplace('console.error')
+    	conditionArr.push('console.error')
+
     }if(drop_info )
     {
-      source = await  replace.toReplace('console.info')
+    	conditionArr.push('console.info')
     }if(drop_warn )
     {
-      source =  await replace.toReplace('console.warn')
+    	conditionArr.push('console.warn')
     }
+    source = await new Promise((resolve)=>{
+    	replace.startReplace(conditionArr,(res)=>{
+    		resolve(res)
+    	})
+    })
     
     return source
   }
 
+   initExcludeRegex(){
+    const excludeArr = this.options.exclude
+    if(!this.options||!excludeArr||excludeArr.length<1)
+    {
+      return ''
+    }
+    var str = ''
+    	for(var index in excludeArr)
+    	{
+    		if(index == 0){
+    			str += excludeArr[index]
+    		}
+    		else
+    		{
+    			str = str + '|' + excludeArr[index]
+    		}
+    	}
+    	return new RegExp(str)
+  }
+
   apply(compiler) {
-    compiler.hooks.afterCompile.tap(this.pluginName,async (compilation) => {
-        await this.findChunks(compilation)
+    // remove in origin file
+    // compiler.hooks.afterCompile.tapAsync(this.pluginName,async (compilation,callback)=>{    
+    //   this.excludeRegex = this.initExcludeRegex()
+    //   compilation.fileDependencies.forEach(async(item)=>{
+    //     if(!item.match(this.excludeRegex))    //to filter 
+    //     {
+    //       let origin =await new Promise((resolve)=>{
+    //         _fs.readFile(item,(err,data)=>{
+    //           if(err)
+    //           {
+    //             return 
+    //           }
+    //           else
+    //           {
+    //             resolve(data.toString())
+    //           }
+    //         })
+    //       }) 
+    //       origin = await this.toReplace(origin)
+    //       await new Promise((resolve)=>{
+    //         _fs.writeFile(item,origin,(err)=>{
+    //           resolve()
+    //         })
+    //       })
+    //     }
+    //   })
+    //   // console.info('drop-console:'+parseInt((Date.now()-startTime) )+'ms')
+    //   callback()
+    // })
+    compiler.hooks.emit.tap(this.pluginName,async (compilation) => {
+        await this.findChunks(compilation)   //remove in compilation,the performace is not good,so that abandon
+        console.info('drop-console:'+parseInt((Date.now()-startTime) )+'ms')
     });
   }
 }

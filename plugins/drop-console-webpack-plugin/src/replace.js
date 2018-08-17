@@ -1,15 +1,27 @@
+
 class Replace{
     constructor(str,condition){
         this.leftStack = []
         this.rightStack = []
         this.str = new Buffer(str)
-
+        this.count = 0;
+        this.standard = 10;
+        this.regexStr = ''
     }
-    matchLeftBracket(condition){
+    matchLeftBracket(conditionArr){
         let leftStack = this.leftStack
         let rightStack = this.rightStack
-
-        if(leftStack.length==1)
+        let condition
+        let conditionMatch = this.str.toString().match(this.regexStr)
+        if(conditionMatch&&conditionMatch.length>0)
+        {
+        	condition = conditionMatch[0]
+        }
+        else
+        {
+        	return -1
+        }
+    	if(leftStack.length==1)
         {
             return this.str.toString().indexOf('(',leftStack[leftStack.length-1]+condition.length+2)
         }
@@ -18,6 +30,21 @@ class Replace{
             return this.str.toString().indexOf('(',leftStack[leftStack.length-1]+1)
         }
         return this.str.toString().indexOf(condition+'(')
+        
+    }
+    getRegex(conditionArr){
+    	var str = ''
+    	for(var index in conditionArr)
+    	{
+    		if(index == 0){
+    			str += conditionArr[index]
+    		}
+    		else
+    		{
+    			str = str + '|' + conditionArr[index]
+    		}
+    	}
+    	return new RegExp(str)
     }
     matchRightBracket(){
         let leftStack = this.leftStack
@@ -29,14 +56,26 @@ class Replace{
         }
         return this.str.toString().indexOf(')',leftStack[leftStack.length-1]+1)
     }
-    async main(condition){
+    toRecursive(conditionArr,cb){
+        this.count++;
+        if(this.count>=this.standard)
+        {
+            this.count = 0;
+            return process.nextTick(()=>{
+                return this.toReplace(conditionArr,cb)
+            })
+        }
+        else
+        {
+            return this.toReplace(conditionArr,cb)
+        }
+    }
+    toReplace(conditionArr,cb){
             let leftStack = this.leftStack
             let rightStack = this.rightStack
             let startIndex,endIndex
-            startIndex = this.matchLeftBracket(condition)
+            startIndex = this.matchLeftBracket(conditionArr)
             endIndex = this.matchRightBracket()
-            // console.log('----------',condition,startIndex,leftStack,rightStack,this.str.toString())
-            // console.log('++++++++++',leftStack.length>0&&rightStack.length===leftStack.length,startIndex>=0&&leftStack.length<1,startIndex>=0&&startIndex<=endIndex,endIndex>=0 &&leftStack.length>0,startIndex<0&&leftStack.length<1&&rightStack.length<1)
             if(this.str.toString().length<1)
             {
                 return this.str.toString()
@@ -48,11 +87,7 @@ class Replace{
                 this.str = new Buffer(strArr.join(''))
                 this.leftStack = []
                 this.rightStack = []
-                return await new Promise((resolve)=>{
-                    process.nextTick(async ()=>{
-                       resolve( await this.main(condition))
-                   })
-                })
+                return this.toRecursive(conditionArr,cb)
             }
             if(startIndex>=0&&leftStack.length<1)
             {
@@ -67,26 +102,19 @@ class Replace{
                 rightStack.push(endIndex)
             }
             else if(startIndex<0&&leftStack.length<1&&rightStack.length<1){
-                return  this.str.toString()  
+                 cb(this.str.toString())
+                 return
             }
-            return await new Promise((resolve)=>{
-                process.nextTick(async ()=>{
-                   resolve( await this.main(condition))
-               })
-            })
+            return this.toRecursive(conditionArr,cb)
     }
-
-    async toReplace(condition)
-    {
-        return await this.main(condition)
+    startReplace(conditionArr,cb){
+    	this.regexStr = this.getRegex(conditionArr)
+    	return this.toReplace(conditionArr,cb)
     }
     
 }
 
-// new Replace('console.log(fun())function A(){console.log(123)}console.log()//123213console.log(dasdadasdfunction(){a})').toReplace('console.log',(res)=>{
+// new Replace('console.log(fun())function A(){console.info(123)}console.error()//123213console.warn(dasdadasdfunction(){a})').startReplace(['console.info','console.log','console.error','console.warn'],(res)=>{
 //     console.log('result',res)
 // })   //test
-// console.log( new Replace('console.log(fun())function A(){console.log(123)}console.log()//123213console.log(dasdadasdfunction(){a})').toReplace('console.log').then((res)=>{
-//     console.log(res)
-// }))
 module.exports = Replace

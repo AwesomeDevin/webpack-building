@@ -5,9 +5,10 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");   //css提取,l
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");   //css压缩
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin')
-// const DropConsoleWebpackPlugin = require('./plugins/drop-console-webpack-plugin')
+const DropConsoleWebpackPlugin = require('./plugins/drop-console-webpack-plugin')
+const path = require('path')
 
-const DropConsoleWebpackPlugin = require('drop-console-webpack-plugin')
+// const DropConsoleWebpackPlugin = require('drop-console-webpack-plugin')
 
 const Config = {
     mode: 'production',
@@ -99,7 +100,7 @@ const Config = {
         ]
     },
     plugins: [
-        new DropConsoleWebpackPlugin(),
+        new DropConsoleWebpackPlugin({drop_log:false,drop_error:true}),
         new webpack.BannerPlugin('版权所有，翻版必究'),
         new HtmlWebpackPlugin({
             template: __dirname + "/src/index.tmpl.html",//new 一个这个插件的实例，并传入相关的参数,
