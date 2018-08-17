@@ -6,34 +6,53 @@ class Replace{
         this.str = new Buffer(str)
         this.count = 0;
         this.standard = 10;
-        this.regexStr = ''
+        this.regexStr = '';
+        this.orIndex = 0;
     }
     matchLeftBracket(conditionArr){
         let leftStack = this.leftStack
         let rightStack = this.rightStack
         let condition
         let conditionMatch = this.str.toString().match(this.regexStr)
-        if(conditionMatch&&conditionMatch.length>0)
+        
+        if(this.regexStr.length<1)
         {
-        	condition = conditionMatch[0]
+            return -1
+        }
+        else if(conditionMatch&&conditionMatch.length>0)
+        {
+            condition = conditionMatch[this.orIndex]
         }
         else
         {
         	return -1
         }
+        
     	if(leftStack.length==1)
         {
+           
             return this.str.toString().indexOf('(',leftStack[leftStack.length-1]+condition.length+2)
         }
          if(leftStack.length>0)
         {
             return this.str.toString().indexOf('(',leftStack[leftStack.length-1]+1)
         }
-        return this.str.toString().indexOf(condition+'(')
+        const index =  this.str.toString().indexOf(condition+'(',this.orIndex)
+        if(this.str.toString().charAt(index-2) == '|' || this.str.toString().charAt(index-2) == '&')
+        {
+           this.orIndex += 1
+           return this.matchLeftBracket(conditionArr)
+        }
         
+        this.orIndex = 0;
+        return index
     }
     getRegex(conditionArr){
-    	var str = ''
+        var str = ''
+        if(conditionArr.length<1)
+        {
+            return str
+        }
     	for(var index in conditionArr)
     	{
     		if(index == 0){
@@ -44,7 +63,7 @@ class Replace{
     			str = str + '|' + conditionArr[index]
     		}
     	}
-    	return new RegExp(str)
+    	return new RegExp(str,'g')
     }
     matchRightBracket(){
         let leftStack = this.leftStack
@@ -54,7 +73,8 @@ class Replace{
         {
             return this.str.toString().indexOf(')',rightStack[rightStack.length-1]+1)
         }
-        return this.str.toString().indexOf(')',leftStack[leftStack.length-1]+1)
+        const index = leftStack[leftStack.length-1]?leftStack[leftStack.length-1]:0
+        return this.str.toString().indexOf(')',index+1)
     }
     toRecursive(conditionArr,cb){
         this.count++;
@@ -93,13 +113,13 @@ class Replace{
             {
                 leftStack.push(startIndex)
             }
-            else if(startIndex>=0&&startIndex<=endIndex)
-            {
-                leftStack.push(startIndex)
-            }
             else if(endIndex>=0 &&leftStack.length>0)
             {
                 rightStack.push(endIndex)
+            }
+            else if(startIndex>=0&&startIndex<=endIndex)
+            {
+                leftStack.push(startIndex)
             }
             else if(startIndex<0&&leftStack.length<1&&rightStack.length<1){
                  cb(this.str.toString())
@@ -108,13 +128,14 @@ class Replace{
             return this.toRecursive(conditionArr,cb)
     }
     startReplace(conditionArr,cb){
+        // console.log('---')
     	this.regexStr = this.getRegex(conditionArr)
     	return this.toReplace(conditionArr,cb)
     }
     
 }
 
-// new Replace('console.log(fun())function A(){console.info(123)}console.error()//123213console.warn(dasdadasdfunction(){a})').startReplace(['console.info','console.log','console.error','console.warn'],(res)=>{
+// new Replace('dsad||console.log(fun())function A(){console.info(123)}console.error()//123213console.warn(dasdadasdfunction(){a})').startReplace(['console.info','console.log','console.error','console.warn'],(res)=>{
 //     console.log('result',res)
 // })   //test
 module.exports = Replace

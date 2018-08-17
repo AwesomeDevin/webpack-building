@@ -100,7 +100,7 @@ const Config = {
         ]
     },
     plugins: [
-        new DropConsoleWebpackPlugin({exclude:['manifest']}),
+        new DropConsoleWebpackPlugin({exclude:['manifest'],drop_log:false,drop_error:false,drop_info:false,drop_warn:false}),
         new webpack.BannerPlugin('版权所有，翻版必究'),
         new HtmlWebpackPlugin({
             template: __dirname + "/src/index.tmpl.html",//new 一个这个插件的实例，并传入相关的参数,

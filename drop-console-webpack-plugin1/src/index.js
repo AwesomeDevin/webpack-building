@@ -40,16 +40,16 @@ function DropConsoleWebpackPlugin(options) {
         for(var file of chunks[i].files)
         {
           (async(file,self)=>{
-          	console.log(file,!file.match('chunk')&&!file.match('.map'),this.excludeRegex.length<1||!file.match(this.excludeRegex))
+          	// console.log(file,!file.match('chunk')&&!file.match('.map'),this.excludeRegex.length<1||!file.match(this.excludeRegex))
           	if(!file.match('chunk')&&!file.match('.map'))
             {
             	if(this.excludeRegex.length<1||!file.match(this.excludeRegex))
             	{
-            		console.log('toreplace')
+            		// console.log('toreplace')
 		            let source = compilation.assets[file].source()
 		            const replaceSource = await self.toReplace(source)
 		            compilation.assets[file]=new ConcatSource(replaceSource)
-		            console.log('replaced',replaceSource.match('console.log'))
+		            // console.log('replaced',replaceSource.match('console.log'))
 	        	}
         	}
           })(file,self)
