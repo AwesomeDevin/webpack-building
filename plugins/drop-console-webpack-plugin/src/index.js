@@ -82,6 +82,7 @@ class DropConsoleWebpackPlugin {
     	conditionArr.push('console.warn')
     }
     source = await new Promise((resolve)=>{
+      console.log(conditionArr)
     	replace.startReplace(conditionArr,(res)=>{
     		resolve(res)
     	})
@@ -91,7 +92,7 @@ class DropConsoleWebpackPlugin {
   }
 
    initExcludeRegex(){
-    const excludeArr = this.options.exclude
+    const excludeArr = this.options&&this.options.exclude?this.options.exclude:[]
     if(!this.options||!excludeArr||excludeArr.length<1)
     {
       return ''
