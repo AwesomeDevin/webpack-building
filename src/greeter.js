@@ -8,7 +8,6 @@ import styles from './greeter.css';
 //   	return greet;
 // }
 
-
 class Greeter extends Component{
 	render(){
 		return (
