@@ -7,7 +7,6 @@ import styles from './greeter.css';
 //   	greet.textContent = config.greetText;
 //   	return greet;
 // }
-
 class Greeter extends Component{
 	render(){
 		return (
