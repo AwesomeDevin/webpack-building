@@ -1,5 +1,6 @@
 'use strict';
-const Replace = require('./replace')
+// const Replace = require('./replace')
+const replace = require('../ast/index')
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -48,7 +49,7 @@ class DropConsoleWebpackPlugin {
   }
 
    async toReplace(source){
-    const replace = new Replace(source)
+    // const replace = new Replace(source)
     const conditionArr = []
     let drop_log= true,drop_error= false,drop_info= true,drop_warn = false
     
@@ -81,12 +82,12 @@ class DropConsoleWebpackPlugin {
     {
     	conditionArr.push('console.warn')
     }
-    source = await new Promise((resolve)=>{
-      console.log(conditionArr)
-    	replace.startReplace(conditionArr,(res)=>{
-    		resolve(res)
-    	})
-    })
+    // source = await new Promise((resolve)=>{
+    // 	replace.startReplace(conditionArr,(res)=>{
+    // 		resolve(res)
+    // 	})
+    // })
+    source = replace(source,conditionArr)
     
     return source
   }
