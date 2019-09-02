@@ -1,6 +1,7 @@
 'use strict';
 // const Replace = require('./replace')
 const replace = require('../ast/index')
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -32,11 +33,13 @@ class DropConsoleWebpackPlugin {
         for(var file of chunks[i].files)
         {
           (async(file,self,compilation)=>{
-            if(!file.match('chunk')&&!file.match('.map'))
+            if(!file.match('.map')&&file.match(/.*\.js$/))   //limit file type
             {
+              
                 if(this.excludeRegex.length<1||!file.match(this.excludeRegex))
                 {
                   let source = compilation.assets[file].source()
+                  !file.match('.map')&&file.match(/bundle\.js$/) && _fs.writeFileSync(_path.join(__dirname,'./source.js'),source)
                   var replacedSource = await self.toReplace(source)
                   compilation.assets[file].source = ()=>{
                     return  replacedSource
@@ -87,8 +90,8 @@ class DropConsoleWebpackPlugin {
     // 		resolve(res)
     // 	})
     // })
-    source = replace(source,conditionArr)
-    
+   
+    source =  replace(source,conditionArr)
     return source
   }
 
@@ -146,7 +149,7 @@ class DropConsoleWebpackPlugin {
         const startTime = Date.now()
         this.excludeRegex = this.initExcludeRegex()
         await this.findChunks(compilation)   //remove in compilation,the performace is not good,so that abandon
-        console.info('[drop-console]: '+parseInt((Date.now()-startTime) /1000 )+'s')
+        console.info('[drop-console]: '+parseInt((Date.now()-startTime)  )+'ms')
     });
   }
 }
